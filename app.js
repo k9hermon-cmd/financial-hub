@@ -3,10 +3,6 @@
  * Client-Side Application Engine (ES6)
  */
 
-// Permanent embedded Gemini API Key
-const GEMINI_API_KEY = "AQ.Ab8RN6JjlYzFodERAQFW5N4C80heKZymuC7eInwqOVRyl5gq1w";
-
-
 // Embedded fallback questions data to ensure 100% operation even when opened directly via file://
 const EMBEDDED_QUESTIONS_DATA = {
   "practiceQuestions": [
@@ -667,10 +663,6 @@ class FinancialAIApp {
     this.examAnswers = JSON.parse(localStorage.getItem('fin_hub_exam_answers') || '{}');
     this.examSubmitted = localStorage.getItem('fin_hub_exam_submitted') === 'true';
     this.examResult = JSON.parse(localStorage.getItem('fin_hub_exam_result') || 'null');
-    
-    // Chat state
-    this.chatHistory = [];
-    this.isGenerating = false;
 
     // Default Google Form Configuration
     const DEFAULT_GFORM_CONFIG = {
@@ -721,9 +713,6 @@ class FinancialAIApp {
     this.initExamTracker();
     this.renderExamQuestions();
     this.calculateRoicWidget();
-
-    // Pre-seed Playground Prompt
-    this.handleTemplateChange('template1');
 
     // If user already took exam, restore results view capability
     if (this.examSubmitted && this.examResult) {
@@ -1026,276 +1015,122 @@ class FinancialAIApp {
   }
 
   /**
-   * Screen 3: Live Gemini AI Playground
+   * Toast notification helper
    */
-  handleTemplateChange(templateKey) {
-    const textarea = document.getElementById('playground-prompt-input');
-    if (!textarea) return;
-    textarea.value = PROMPT_TEMPLATES[templateKey] || '';
-  }
-
-  loadSampleFilingData() {
-    const textarea = document.getElementById('playground-prompt-input');
-    if (!textarea) return;
-
-    const currentText = textarea.value.trim();
-    if (currentText && !currentText.includes('קומפיו-טק מערכות בע"מ')) {
-      textarea.value = currentText + '\n\n' + SAMPLE_FILING_TEXT;
-    } else {
-      textarea.value = PROMPT_TEMPLATES.template1 + '\n\n' + SAMPLE_FILING_TEXT;
-    }
-    textarea.scrollTop = textarea.scrollHeight;
-  }
-
-  clearPlaygroundInput() {
-    const textarea = document.getElementById('playground-prompt-input');
-    if (textarea) textarea.value = '';
-  }
-
-  insertChallengePrompt(text) {
-    const followupInput = document.getElementById('chat-followup-input');
-    if (followupInput) {
-      followupInput.value = text;
-      followupInput.focus();
-    }
-  }
-
-  resetChat() {
-    this.chatHistory = [];
-    const container = document.getElementById('chat-messages-container');
-    const turnsSpan = document.getElementById('chat-turns-count');
-    if (container) {
-      container.innerHTML = `
-        <div id="chat-welcome-placeholder" class="text-center py-12 px-4 space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-cyan-950/60 text-cyan-400 border border-cyan-800/40 flex items-center justify-center mx-auto">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-          </div>
-          <h4 class="text-sm font-bold text-slate-200">סביבת השיחה מוכנה</h4>
-          <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            בחר תבנית פרומפט מימין או לחץ על "הזן דוח כספי לדוגמה", ולחץ "שלח ל-Gemini". התשובה תוצג כאן עם רינדור מלא של טבלאות ונוסחאות.
-          </p>
-        </div>
-      `;
-    }
-    if (turnsSpan) turnsSpan.textContent = '(0 הודעות)';
-  }
-
-  async sendToGemini() {
-    if (this.isGenerating) return;
-
-    const textarea = document.getElementById('playground-prompt-input');
-    const userPrompt = textarea ? textarea.value.trim() : '';
-
-    if (!userPrompt) {
-      alert('נא להזין טקסט פרומפט או נתוני דוח כספי.');
+  showToast(message, type = 'success') {
+    const toast = document.getElementById('app-toast');
+    if (!toast) {
+      alert(message);
       return;
     }
-
-    // Add to chat history as user message
-    this.appendChatMessage('user', userPrompt);
-    this.chatHistory.push({ role: 'user', text: userPrompt });
-
-    // Call API
-    await this.executeGeminiRequest();
+    toast.textContent = message;
+    toast.className = `app-toast show ${type}`;
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.className = 'app-toast';
+    }, 2500);
   }
 
-  async handleFollowUpSubmit(e) {
-    e.preventDefault();
-    if (this.isGenerating) return;
-
-    const input = document.getElementById('chat-followup-input');
-    const text = input ? input.value.trim() : '';
-    if (!text) return;
-
-    input.value = '';
-    this.appendChatMessage('user', text);
-    this.chatHistory.push({ role: 'user', text });
-
-    await this.executeGeminiRequest();
+  /**
+   * Screen 3: Copy & Prompt Lab Methods
+   */
+  async copySampleFiling() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(SAMPLE_FILING_TEXT);
+      } else {
+        throw new Error('Clipboard API unavailable');
+      }
+      this.showToast('הועתק! הדבק בצ\'אט ה-AI שלך', 'success');
+    } catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = SAMPLE_FILING_TEXT;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      this.showToast('הועתק! הדבק בצ\'אט ה-AI שלך', 'success');
+    }
   }
 
-  async executeGeminiRequest() {
-    this.isGenerating = true;
-    this.setGeminiLoadingState(true);
+  toggleSampleReportPreview() {
+    const el = document.getElementById('sample-report-preview');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      this.showToast('הדוח הכספי מוצג לעיל לעיונך');
+    }
+  }
 
-    // Placeholder message bubble for streaming / loading
-    const loadingBubbleId = this.appendLoadingMessageBubble();
+  async copyPrompt(promptId) {
+    const el = document.getElementById(`prompt-${promptId}-text`);
+    const promptText = el ? el.textContent.trim().replace(/^"|"$/g, '') : '';
+    if (!promptText) return;
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-      
-      // Keep and send only the last 2 user turns in context to minimize token usage
-      const userIndices = [];
-      this.chatHistory.forEach((item, idx) => {
-        if (item.role === 'user') userIndices.push(idx);
-      });
-      const startIndex = userIndices.length > 2 ? userIndices[userIndices.length - 2] : 0;
-      const recentHistory = this.chatHistory.slice(startIndex);
-
-      const contents = recentHistory.map(item => ({
-        role: item.role === 'user' ? 'user' : 'model',
-        parts: [{ text: item.text }]
-      }));
-
-      const systemInstruction = {
-        parts: [{
-          text: "אתה מנטור פיננסי תמציתי ומדויק. ענה בקצרה, התמקד במספרים ובעקרונות החשבונאיים, ללא הקדמות ארוכות וללא פטפוט מיותר."
-        }]
-      };
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          systemInstruction,
-          contents,
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 600
-          }
-        })
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        throw new Error(errJson.error?.message || `API Error: ${response.status}`);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(promptText);
+      } else {
+        throw new Error('Clipboard API unavailable');
       }
-
-      const data = await response.json();
-      const modelReply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'לא התקבלה תשובה מפורטת מהמודל.';
-
-      // Save to chat history
-      this.chatHistory.push({ role: 'model', text: modelReply });
-
-      // Update loading bubble with real parsed markdown
-      this.updateLoadingBubbleWithContent(loadingBubbleId, modelReply);
-
+      this.showToast('השאלה הועתקה ללוח!', 'success');
     } catch (err) {
-      this.updateLoadingBubbleWithContent(loadingBubbleId, `**שגיאה בעת תקשורת עם Gemini:** ${err.message}`, true);
-    } finally {
-      this.isGenerating = false;
-      this.setGeminiLoadingState(false);
-      this.updateChatTurnsCount();
+      const ta = document.createElement('textarea');
+      ta.value = promptText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      this.showToast('השאלה הועתקה ללוח!', 'success');
     }
   }
 
-  setGeminiLoadingState(isLoading) {
-    const btn = document.getElementById('send-gemini-btn');
-    const btnText = document.getElementById('gemini-btn-text');
-    const followupBtn = document.getElementById('chat-followup-btn');
+  /**
+   * Copy exam results to clipboard (Backup method)
+   */
+  async copyResultsToClipboard() {
+    const studentName = this.studentName || 'תלמיד';
+    const score = this.examResult ? this.examResult.finalScore : 0;
+    const emailInput = document.getElementById('submit-student-email');
+    const email = emailInput ? emailInput.value.trim() : 'לא הוזן';
 
-    if (isLoading) {
-      if (btn) btn.disabled = true;
-      if (btnText) btnText.textContent = 'Gemini 1.5 Flash מנתח נתונים...';
-      if (followupBtn) followupBtn.disabled = true;
+    const summaryText = `בית החרמון קפיטל - תוצאות מבחן מסכם:\nשם: ${studentName}\nמייל: ${email}\nציון סופי: ${score} מתוך 100\nתאריך: ${new Date().toLocaleDateString('he-IL')}`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(summaryText);
+      } else {
+        throw new Error('Clipboard API unavailable');
+      }
+      this.showToast('התוצאות הועתקו ללוח בהצלחה!', 'success');
+    } catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = summaryText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      this.showToast('התוצאות הועתקו ללוח בהצלחה!', 'success');
+    }
+  }
+
+  /**
+   * Password-protected instructor/admin submission test
+   * Password: 6981
+   */
+  async runAdminSubmissionTest() {
+    const entered = prompt('אנא הזן קוד בדיקה למנהל:');
+    if (entered === null) return;
+
+    if (entered.trim() === '6981') {
+      try {
+        await this.submitToGoogleForms('בדיקת מערכת - מנהל', 'admin@test.com', '100');
+        alert('בדיקת המנהל נשלחה בהצלחה! בדוק את שורת הבדיקה ב-Google Sheets שלך.');
+      } catch (err) {
+        alert('שגיאה בעת שיגור בדיקת המנהל: ' + err.message);
+      }
     } else {
-      if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'שלח ל-Gemini 1.5 Flash';
-      if (followupBtn) followupBtn.disabled = false;
+      alert('סיסמה שגויה');
     }
-  }
-
-  appendChatMessage(role, text) {
-    const container = document.getElementById('chat-messages-container');
-    const placeholder = document.getElementById('chat-welcome-placeholder');
-    if (placeholder) placeholder.remove();
-
-    const bubble = document.createElement('div');
-    bubble.className = role === 'user' 
-      ? 'p-4 rounded-2xl bg-blue-950/40 border border-blue-900/60 mr-4 space-y-2' 
-      : 'p-4 rounded-2xl bg-slate-900/90 border border-slate-800 ml-4 space-y-2';
-
-    const header = document.createElement('div');
-    header.className = 'flex items-center justify-between text-xs font-mono';
-    
-    if (role === 'user') {
-      header.innerHTML = `
-        <div class="flex items-center gap-1.5 text-blue-400 font-bold">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7 7z" /></svg>
-          <span>אנליסט (${this.studentName || 'תלמיד'})</span>
-        </div>
-        <span class="text-slate-500">${new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
-      `;
-    } else {
-      header.innerHTML = `
-        <div class="flex items-center gap-1.5 text-cyan-400 font-bold">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-          <span>Gemini 1.5 Flash Analyst</span>
-        </div>
-        <span class="text-slate-500">${new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
-      `;
-    }
-    bubble.appendChild(header);
-
-    const body = document.createElement('div');
-    body.className = 'markdown-body text-xs leading-relaxed';
-    body.innerHTML = (typeof marked !== 'undefined') ? marked.parse(text) : text;
-    bubble.appendChild(body);
-
-    container.appendChild(bubble);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  appendLoadingMessageBubble() {
-    const container = document.getElementById('chat-messages-container');
-    const bubbleId = 'bubble-' + Date.now();
-
-    const bubble = document.createElement('div');
-    bubble.id = bubbleId;
-    bubble.className = 'p-4 rounded-2xl bg-slate-900/90 border border-slate-800 ml-4 space-y-2';
-
-    bubble.innerHTML = `
-      <div class="flex items-center justify-between text-xs font-mono text-cyan-400 font-bold">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 pulse-indicator"></span>
-          <span>Gemini 1.5 Flash מעבד נתונים פיננסיים...</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 py-3 text-slate-400 text-xs font-mono">
-        <div class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></div>
-        <div class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]"></div>
-        <div class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]"></div>
-        <span class="mr-2">מפעיל חישוב ומחלץ ביאורים...</span>
-      </div>
-    `;
-
-    container.appendChild(bubble);
-    container.scrollTop = container.scrollHeight;
-    return bubbleId;
-  }
-
-  updateLoadingBubbleWithContent(bubbleId, markdownContent, isError = false) {
-    const bubble = document.getElementById(bubbleId);
-    if (!bubble) return;
-
-    if (isError) {
-      bubble.className = 'p-4 rounded-2xl bg-rose-950/60 border border-rose-800 ml-4 space-y-2';
-    }
-
-    bubble.innerHTML = `
-      <div class="flex items-center justify-between text-xs font-mono">
-        <div class="flex items-center gap-1.5 ${isError ? 'text-rose-400' : 'text-cyan-400'} font-bold">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-          <span>Gemini 1.5 Flash Analyst</span>
-        </div>
-        <span class="text-slate-500">${new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
-      </div>
-      <div class="markdown-body text-xs leading-relaxed pt-1">
-        ${(typeof marked !== 'undefined') ? marked.parse(markdownContent) : markdownContent}
-      </div>
-    `;
-
-    const container = document.getElementById('chat-messages-container');
-    if (container) container.scrollTop = container.scrollHeight;
-  }
-
-  updateChatTurnsCount() {
-    const span = document.getElementById('chat-turns-count');
-    if (span) span.textContent = `(${this.chatHistory.length} הודעות בשיחה)`;
   }
 
   /**
@@ -1785,7 +1620,7 @@ window.submitToGoogleForms = async (name, email, score) => {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("Financial AI Hub v2.3 loaded - Permanent API Key Active");
+  console.log("Financial AI Hub v3.0 loaded - Beit HaHermon Capital");
   app.init();
 });
 

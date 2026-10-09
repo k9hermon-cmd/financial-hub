@@ -156,25 +156,110 @@ body {
   color: #93c5fd;
   display: block;
 }
-.markdown-body table {
+/* ========================================================
+   Financial Data Tables - light background, clear borders,
+   dark high-contrast text for maximum readability
+   ======================================================== */
+.markdown-body table,
+.fin-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1rem 0;
+  margin: 0.75rem 0;
   direction: rtl;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
-.markdown-body th, .markdown-body td {
-  border: 1px solid #334155;
-  padding: 0.6rem 0.8rem;
+.markdown-body th, .markdown-body td,
+.fin-table th, .fin-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.8rem;
   text-align: right;
+  color: #0f172a;
 }
-.markdown-body th {
-  background-color: #1e293b;
-  color: #38bdf8;
+.markdown-body th,
+.fin-table th {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+.markdown-body tr:nth-child(even),
+.fin-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+.fin-table td {
   font-weight: 600;
 }
-.markdown-body tr:nth-child(even) {
-  background-color: rgba(15, 23, 42, 0.6);
+.fin-table td.num,
+.fin-table th.num {
+  font-family: 'JetBrains Mono', monospace;
+  text-align: left;
+  direction: ltr;
+  white-space: nowrap;
+}
+.fin-table tr.total td {
+  font-weight: 800;
+  background-color: #eef2ff;
+  border-top: 2px solid #94a3b8;
+}
+.fin-table tr.sub td {
+  color: #475569;
+  font-weight: 500;
+}
+.fin-table caption {
+  caption-side: top;
+  text-align: right;
+  font-weight: 800;
+  color: #0f172a;
+  background-color: #e2e8f0;
+  padding: 0.5rem 0.8rem;
+}
+.fin-table-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+.fin-table-wrap .fin-table {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* Toast notifications (copy feedback, admin test, errors) */
+.app-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 60;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.9rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  max-width: 90vw;
+  text-align: center;
+}
+.app-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.app-toast.success {
+  background-color: #059669;
+  color: #ffffff;
+  border: 1px solid #34d399;
+}
+.app-toast.error {
+  background-color: #be123c;
+  color: #ffffff;
+  border: 1px solid #fb7185;
 }
 .markdown-body blockquote {
   border-right: 4px solid #3b82f6;
