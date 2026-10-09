@@ -4,7 +4,8 @@
  */
 
 // Permanent embedded Gemini API Key
-const GEMINI_API_KEY = "AQ.Ab8RN6I8cgdAev7VCqX92EwUM2ZSEbXhj4Yfv8yuLd4jZN9weg";
+const GEMINI_API_KEY = "AQ.Ab8RN6JjlYzFodERAQFW5N4C80heKZymuC7eInwqOVRyl5gq1w";
+
 
 // Embedded fallback questions data to ensure 100% operation even when opened directly via file://
 const EMBEDDED_QUESTIONS_DATA = {
@@ -1146,7 +1147,10 @@ class FinancialAIApp {
 
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY
+        },
         body: JSON.stringify({
           systemInstruction,
           contents,
@@ -1782,7 +1786,7 @@ window.submitToGoogleForms = async (name, email, score) => {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("Financial AI Hub v2.1 loaded - Permanent API Key Active");
+  console.log("Financial AI Hub v2.2 loaded - Permanent API Key Active");
   app.init();
 });
 
