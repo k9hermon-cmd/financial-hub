@@ -1782,6 +1782,8 @@ window.submitToGoogleForms = async (name, email, score) => {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  console.log("Financial AI Hub v2.1 loaded - Permanent API Key Active");
   app.init();
 });
+
 
