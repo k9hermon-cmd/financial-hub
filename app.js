@@ -3,6 +3,9 @@
  * Client-Side Application Engine (ES6)
  */
 
+// Permanent embedded Gemini API Key
+const GEMINI_API_KEY = "AQ.Ab8RN6I8cgdAev7VCqX92EwUM2ZSEbXhj4Yfv8yuLd4jZN9weg";
+
 // Embedded fallback questions data to ensure 100% operation even when opened directly via file://
 const EMBEDDED_QUESTIONS_DATA = {
   "practiceQuestions": [
@@ -652,7 +655,6 @@ const SAMPLE_FILING_TEXT = `--- דוח כספי לדוגמה: קומפיו-טק 
 class FinancialAIApp {
   constructor() {
     this.studentName = localStorage.getItem('fin_hub_student_name') || '';
-    this.apiKey = localStorage.getItem('fin_hub_gemini_key') || '';
     this.currentScreen = 'screen-welcome';
     this.currentLessonTab = 'm1';
     
@@ -703,21 +705,11 @@ class FinancialAIApp {
       console.log('Using embedded questions database (GitHub Pages static mode)');
     }
 
-    // Populate saved name and API key in inputs
+    // Populate saved name in inputs
     if (this.studentName) {
       const nameInput = document.getElementById('student-name-input');
       if (nameInput) nameInput.value = this.studentName;
       this.updateStudentHeader();
-    }
-
-    if (this.apiKey) {
-      const initKeyInput = document.getElementById('initial-api-key');
-      if (initKeyInput) initKeyInput.value = this.apiKey;
-      const modalKeyInput = document.getElementById('modal-api-key-input');
-      if (modalKeyInput) modalKeyInput.value = this.apiKey;
-      this.updateApiKeyStatusUI(true);
-    } else {
-      this.updateApiKeyStatusUI(false);
     }
 
     // Load Google Form config into inputs
@@ -817,8 +809,6 @@ class FinancialAIApp {
   handleOnboardingSubmit(e) {
     e.preventDefault();
     const nameInput = document.getElementById('student-name-input');
-    const keyInput = document.getElementById('initial-api-key');
-
     const name = nameInput ? nameInput.value.trim() : '';
     if (!name) {
       alert('אנא הזן שם פרטי.');
@@ -829,117 +819,8 @@ class FinancialAIApp {
     localStorage.setItem('fin_hub_student_name', name);
     this.updateStudentHeader();
 
-    if (keyInput && keyInput.value.trim()) {
-      this.apiKey = keyInput.value.trim();
-      localStorage.setItem('fin_hub_gemini_key', this.apiKey);
-      this.updateApiKeyStatusUI(true);
-    }
-
-    // Advance to Screen 2
+    // Advance directly to Screen 2
     this.navigateTo('screen-lessons');
-  }
-
-  /**
-   * API Key Modal & Management
-   */
-  openApiKeyModal() {
-    const modal = document.getElementById('api-key-modal');
-    const input = document.getElementById('modal-api-key-input');
-    if (input) input.value = this.apiKey;
-    const statusBox = document.getElementById('modal-test-status');
-    if (statusBox) statusBox.classList.add('hidden');
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-  }
-
-  closeApiKeyModal() {
-    const modal = document.getElementById('api-key-modal');
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  }
-
-  toggleApiKeyVisibility(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    input.type = input.type === 'password' ? 'text' : 'password';
-  }
-
-  saveApiKeyFromModal() {
-    const input = document.getElementById('modal-api-key-input');
-    if (!input) return;
-    const key = input.value.trim();
-    this.apiKey = key;
-    localStorage.setItem('fin_hub_gemini_key', key);
-    this.updateApiKeyStatusUI(!!key);
-    this.closeApiKeyModal();
-  }
-
-  updateApiKeyStatusUI(isConnected) {
-    const dot = document.getElementById('api-status-dot');
-    const text = document.getElementById('api-status-text');
-
-    if (isConnected) {
-      if (dot) {
-        dot.classList.remove('bg-rose-500');
-        dot.classList.add('bg-emerald-400');
-      }
-      if (text) text.textContent = 'Gemini API מחובר 🟢';
-    } else {
-      if (dot) {
-        dot.classList.remove('bg-emerald-400');
-        dot.classList.add('bg-rose-500');
-      }
-      if (text) text.textContent = 'הגדר מפתח AI 🔑';
-    }
-  }
-
-  async testApiKeyConnection() {
-    const input = document.getElementById('modal-api-key-input');
-    const statusBox = document.getElementById('modal-test-status');
-    if (!input || !statusBox) return;
-
-    const key = input.value.trim();
-    if (!key) {
-      statusBox.className = 'p-2.5 rounded-lg text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800';
-      statusBox.textContent = 'נא להזין מפתח לבדיקה.';
-      statusBox.classList.remove('hidden');
-      return;
-    }
-
-    statusBox.className = 'p-2.5 rounded-lg text-[11px] bg-blue-950/80 text-blue-300 border border-blue-800';
-    statusBox.textContent = 'בודק חיבור ל-Gemini 1.5 Flash...';
-    statusBox.classList.remove('hidden');
-
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-      const payload = {
-        contents: [{ role: 'user', parts: [{ text: 'Respond with the single word: OK' }] }]
-      };
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        statusBox.className = 'p-2.5 rounded-lg text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800';
-        statusBox.textContent = 'חיבור הצליח! המפתח תקין ופעיל.';
-        this.apiKey = key;
-        localStorage.setItem('fin_hub_gemini_key', key);
-        this.updateApiKeyStatusUI(true);
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        statusBox.className = 'p-2.5 rounded-lg text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800';
-        statusBox.textContent = `שגיאת אימות: ${errJson.error?.message || 'מפתח שגוי או חסום'}`;
-      }
-    } catch (err) {
-      statusBox.className = 'p-2.5 rounded-lg text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800';
-      statusBox.textContent = `שגיאת רשת: ${err.message}`;
-    }
   }
 
   /**
@@ -1203,12 +1084,6 @@ class FinancialAIApp {
   async sendToGemini() {
     if (this.isGenerating) return;
 
-    if (!this.apiKey) {
-      this.openApiKeyModal();
-      alert('נדרש מפתח Gemini API כדי להפעיל את המעבדה. אנא הזן מפתח בחלון שנפתח.');
-      return;
-    }
-
     const textarea = document.getElementById('playground-prompt-input');
     const userPrompt = textarea ? textarea.value.trim() : '';
 
@@ -1233,11 +1108,6 @@ class FinancialAIApp {
     const text = input ? input.value.trim() : '';
     if (!text) return;
 
-    if (!this.apiKey) {
-      this.openApiKeyModal();
-      return;
-    }
-
     input.value = '';
     this.appendChatMessage('user', text);
     this.chatHistory.push({ role: 'user', text });
@@ -1253,32 +1123,36 @@ class FinancialAIApp {
     const loadingBubbleId = this.appendLoadingMessageBubble();
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
       
-      // Build multi-turn context
-      const systemInstructionText = `You are a Senior Fundamental Financial Analyst and CFA charterholder assisting a financial analysis student named ${this.studentName || 'Student'}.
-Respond in fluent, professional Hebrew using accurate capital markets terminology (such as CFO, CAPEX, FCF, ROIC, NOPAT, P/E, Working Capital, 10-K, Maya filings).
-Always base your calculations strictly on the text provided by the user (strict Grounding, avoid hallucinations).
-Format your answers with clean Markdown, step-by-step mathematical reasoning, and markdown tables when comparing figures or building financial bridges.`;
+      // Keep and send only the last 2 user turns in context to minimize token usage
+      const userIndices = [];
+      this.chatHistory.forEach((item, idx) => {
+        if (item.role === 'user') userIndices.push(idx);
+      });
+      const startIndex = userIndices.length > 2 ? userIndices[userIndices.length - 2] : 0;
+      const recentHistory = this.chatHistory.slice(startIndex);
 
-      const contents = this.chatHistory.map(item => ({
+      const contents = recentHistory.map(item => ({
         role: item.role === 'user' ? 'user' : 'model',
         parts: [{ text: item.text }]
       }));
 
-      // Add system guidance prefix to first user prompt if needed
-      if (contents.length > 0 && contents[0].role === 'user') {
-        contents[0].parts[0].text = `[הנחיית רקע לאנליסט AI: ${systemInstructionText}]\n\n${contents[0].parts[0].text}`;
-      }
+      const systemInstruction = {
+        parts: [{
+          text: "אתה מנטור פיננסי תמציתי ומדויק. ענה בקצרה, התמקד במספרים ובעקרונות החשבונאיים, ללא הקדמות ארוכות וללא פטפוט מיותר."
+        }]
+      };
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          systemInstruction,
           contents,
           generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 2500
+            temperature: 0.3,
+            maxOutputTokens: 600
           }
         })
       });
@@ -1298,7 +1172,7 @@ Format your answers with clean Markdown, step-by-step mathematical reasoning, an
       this.updateLoadingBubbleWithContent(loadingBubbleId, modelReply);
 
     } catch (err) {
-      this.updateLoadingBubbleWithContent(loadingBubbleId, `**שגיאה בעת תקשורת עם Gemini:** ${err.message}\n\n*נא לוודא שמפתח ה-API תקין ומוגדר.*`, true);
+      this.updateLoadingBubbleWithContent(loadingBubbleId, `**שגיאה בעת תקשורת עם Gemini:** ${err.message}`, true);
     } finally {
       this.isGenerating = false;
       this.setGeminiLoadingState(false);
