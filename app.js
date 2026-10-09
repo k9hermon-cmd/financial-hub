@@ -1124,7 +1124,7 @@ class FinancialAIApp {
     const loadingBubbleId = this.appendLoadingMessageBubble();
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
       
       // Keep and send only the last 2 user turns in context to minimize token usage
       const userIndices = [];
@@ -1148,8 +1148,7 @@ class FinancialAIApp {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           systemInstruction,
@@ -1786,7 +1785,7 @@ window.submitToGoogleForms = async (name, email, score) => {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("Financial AI Hub v2.2 loaded - Permanent API Key Active");
+  console.log("Financial AI Hub v2.3 loaded - Permanent API Key Active");
   app.init();
 });
 
