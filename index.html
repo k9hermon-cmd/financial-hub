@@ -691,7 +691,7 @@
     <section id="screen-playground" class="screen-view hidden animate-fade-in space-y-6">
       
       <!-- Playground Header -->
-      <div class="bg-brand-card rounded-2xl border border-slate-800 p-6 space-y-3">
+      <div class="bg-brand-card rounded-2xl border border-slate-800 p-6 space-y-4">
         <div class="flex items-center justify-between">
           <span class="text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">מעבדת AI • שיטת Copy &amp; Prompt מודרך</span>
           <div class="flex items-center gap-2">
@@ -704,18 +704,41 @@
         </h2>
         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
           במעבדה זו נתרגל שיח ביקורתי ומקצועי מול מודל ה-AI האישי שלך (ChatGPT, Gemini, Claude ועוד). 
-          העתק את הדוח הכספי לדוגמה, בחר מבין 6 שאלות המפתח לאנליסט, ובדוק בעין בוחנת את תשובת ה-AI לפי דגשי הביקורת המפורטים.
+          בלחיצה על הכפתור מועתק פרומפט מונחה יחד עם נתוני הדוח של חברת קומפיו-טק מערכות בע"מ. הפרומפט מגדיר ל-AI את תפקידו, מורה לו לקלוט את הנתונים, ולהפעיל אותך מיד לשאול את 6 שאלות המפתח!
         </p>
 
-        <!-- Primary Action Banner: Copy Sample Financial Report -->
-        <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <!-- Step-by-Step AI Interaction Workflow -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-2.5">
+          <div class="font-bold text-amber-300 flex items-center gap-1.5">
+            <span>💡</span>
+            <span>איך פועלת שיטת התרגול בצ'אט ה-AI?</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-300">
+            <div class="p-3 rounded-lg bg-slate-900 border border-slate-800/80 space-y-1">
+              <span class="text-emerald-400 font-bold block">1. שלב ראשון: הגשת הדוח והפעלת השיחה</span>
+              <p class="text-[11px] leading-relaxed">
+                לחץ על הכפתור הירוק למטה והדבק בצ'אט ה-AI. הטקסט כולל את הדוח המלא והוראה ל-AI לאשר קליטה ולהפעיל אותך במילים:
+                <em class="text-cyan-300 not-italic block mt-1 font-semibold">"קיבלתי את כל הנתונים, עכשיו יש לך 6 שאלות – אנא פתח איתי שיחה דרך העתקה של אותם שאלות."</em>
+              </p>
+            </div>
+            <div class="p-3 rounded-lg bg-slate-900 border border-slate-800/80 space-y-1">
+              <span class="text-blue-400 font-bold block">2. שלב שני: תחקור מונחה מול 6 שאלות המפתח</span>
+              <p class="text-[11px] leading-relaxed">
+                לאחר שה-AI מגיב ומזמין אותך לשאול, העתק כל שאלה בנפרד מתוך 6 שאלות המפתח שלהלן. קרא את תשובת ה-AI בעין ביקורתית ובדוק אם חישוביו מדויקים לפי "דגשי הביקורת".
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Action Banner: Copy Sample Financial Report & Prompt -->
+        <div class="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button 
             type="button" 
             onclick="app.copySampleFiling()" 
             class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-white text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-[0.99]"
           >
             <span class="text-base">📋</span>
-            <span>העתק דוח כספי ותרחיש ללוח</span>
+            <span>העתק דוח כספי ותרחיש ללוח (כולל פרומפט פתיחה)</span>
           </button>
           
           <button 
@@ -723,7 +746,7 @@
             onclick="app.toggleSampleReportPreview()" 
             class="px-4 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm border border-slate-700 transition flex items-center justify-center gap-2"
           >
-            <span>👁️ צפה בדוח הכספי לדוגמה (קומפיו-טק 2024)</span>
+            <span>👁️ צפה בדוח הכספי ובטבלאות (קומפיו-טק 2024)</span>
           </button>
         </div>
       </div>
@@ -735,8 +758,9 @@
             <h3 class="text-sm sm:text-base font-bold text-white">דוח כספי לדוגמה: קומפיו-טק מערכות בע"מ (2024 מול 2023)</h3>
             <p class="text-xs text-slate-400 mt-0.5">דוח לדוגמה המשמש בסיס ל-6 שאלות התחקור שלהלן (נתונים במיליוני ש"ח).</p>
           </div>
-          <button type="button" onclick="app.copySampleFiling()" class="px-3 py-1.5 rounded-lg bg-emerald-950 text-emerald-300 hover:bg-emerald-900 border border-emerald-800 text-xs font-bold transition">
-            📋 העתק דוח
+          <button type="button" onclick="app.copySampleFiling()" class="px-3 py-1.5 rounded-lg bg-emerald-950 text-emerald-300 hover:bg-emerald-900 border border-emerald-800 text-xs font-bold transition flex items-center gap-1.5">
+            <span>📋</span>
+            <span>העתק דוח ופרומפט</span>
           </button>
         </div>
 
@@ -1493,7 +1517,7 @@
         <span>•</span>
         <span>תרגול AI: Copy &amp; Prompt מודרך</span>
         <span>•</span>
-        <span>גרסה: 3.0 (Client-side GitHub Pages)</span>
+        <span>גרסה: 3.1 (Client-side GitHub Pages)</span>
       </div>
     </div>
   </footer>
@@ -1501,7 +1525,7 @@
   <!-- Toast notification container -->
   <div id="app-toast" class="app-toast" role="status" aria-live="polite"></div>
 
-  <!-- Main Application Script (v3.0 cache buster) -->
-  <script src="app.js?v=3.0"></script>
+  <!-- Main Application Script (v3.1 cache buster) -->
+  <script src="app.js?v=3.1"></script>
 </body>
 </html>
