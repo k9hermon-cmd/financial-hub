@@ -1125,26 +1125,6 @@ class FinancialAIApp {
   }
 
   /**
-   * Password-protected instructor/admin submission test
-   * Password: 6981
-   */
-  async runAdminSubmissionTest() {
-    const entered = prompt('אנא הזן קוד בדיקה למנהל:');
-    if (entered === null) return;
-
-    if (entered.trim() === '6981') {
-      try {
-        await this.submitToGoogleForms('בדיקת מערכת - מנהל', 'admin@test.com', '100');
-        alert('בדיקת המנהל נשלחה בהצלחה! בדוק את שורת הבדיקה ב-Google Sheets שלך.');
-      } catch (err) {
-        alert('שגיאה בעת שיגור בדיקת המנהל: ' + err.message);
-      }
-    } else {
-      alert('סיסמה שגויה');
-    }
-  }
-
-  /**
    * Screen 4: Final Certification Exam Engine
    */
   initExamTracker() {

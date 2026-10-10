@@ -89,7 +89,7 @@
         </button>
       </nav>
 
-      <!-- Right Controls: Student Greeting & Admin Access -->
+      <!-- Right Controls: Student Greeting -->
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Student Badge -->
         <div id="header-student-badge" class="hidden items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-xl text-xs">
@@ -97,17 +97,6 @@
           <span class="text-slate-400">שלום,</span>
           <span id="header-student-name" class="font-bold text-white">תלמיד</span>
         </div>
-
-        <!-- Quick Admin Test Button (Accessible from any screen) -->
-        <button 
-          type="button" 
-          onclick="app.runAdminSubmissionTest()" 
-          title="בדיקת תקינות הגשה למרצה (מוגן קוד מנהל 6981)"
-          class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
-        >
-          <span>🧪</span>
-          <span>בדיקת מנהל</span>
-        </button>
       </div>
 
     </div>
@@ -1317,11 +1306,7 @@
             </h3>
             <p class="text-xs text-slate-400 mt-1">שלח את פרטי המבחן והציון ישירות לרישומי הקורס והמרצה.</p>
           </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="app.runAdminSubmissionTest()" class="px-3 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 border border-amber-800 text-amber-300 font-bold text-xs transition flex items-center gap-1 shadow">
-              <span>🧪</span>
-              <span>בדיקת מנהל (קוד 6981)</span>
-            </button>
+          <div>
             <button type="button" onclick="app.toggleGFormSettings()" class="text-xs text-blue-400 hover:text-blue-300 underline">
               הגדרות טופס מרצה ⚙️
             </button>
@@ -1464,13 +1449,6 @@
         </button>
       </div>
 
-      <!-- Admin: password-protected submission health check -->
-      <div class="flex justify-center pb-2 no-print">
-        <button type="button" onclick="app.runAdminSubmissionTest()" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] font-medium text-slate-500 hover:text-slate-300 border border-slate-800 transition">
-          🧪 בדיקת תקינות הגשה (מנהל)
-        </button>
-      </div>
-
     </section>
 
   </main>
@@ -1511,13 +1489,9 @@
         <span>בית החרמון קפיטל - מערכת תמיכה לתלמיד בעזרת AI</span>
       </div>
       <div class="flex items-center gap-4 text-[11px]">
-        <button type="button" onclick="app.runAdminSubmissionTest()" class="text-amber-400 hover:text-amber-300 font-semibold underline transition">
-          🧪 בדיקת תקינות הגשה (מנהל)
-        </button>
-        <span>•</span>
         <span>תרגול AI: Copy &amp; Prompt מודרך</span>
         <span>•</span>
-        <span>גרסה: 3.1 (Client-side GitHub Pages)</span>
+        <span>גרסה: 3.2 (Client-side GitHub Pages)</span>
       </div>
     </div>
   </footer>
@@ -1525,7 +1499,7 @@
   <!-- Toast notification container -->
   <div id="app-toast" class="app-toast" role="status" aria-live="polite"></div>
 
-  <!-- Main Application Script (v3.1 cache buster) -->
-  <script src="app.js?v=3.1"></script>
+  <!-- Main Application Script (v3.2 cache buster) -->
+  <script src="app.js?v=3.2"></script>
 </body>
 </html>
